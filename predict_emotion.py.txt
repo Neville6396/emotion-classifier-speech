@@ -1,0 +1,35 @@
+import librosa
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+import sys
+
+# Load trained model
+model = load_model("final_model.h5")
+
+# Emotion labels used during training
+emotion_labels = ['angry', 'calm', 'disgust', 'fearful', 'happy', 'neutral', 'sad', 'surprised']
+
+# Extract features
+def extract_features(file_path, max_pad_len=40):
+    y, sr = librosa.load(file_path, sr=16000)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
+    if mfcc.shape[1] < max_pad_len:
+        pad_width = max_pad_len - mfcc.shape[1]
+        mfcc = np.pad(mfcc, pad_width=((0, 0), (0, pad_width)), mode='constant')
+    else:
+        mfcc = mfcc[:, :max_pad_len]
+    return mfcc.T.reshape(1, 10, 4, 1)
+
+# Predict emotion
+def predict(file_path):
+    features = extract_features(file_path)
+    prediction = model.predict(features)
+    predicted_label = np.argmax(prediction)
+    print(f"Predicted Emotion: {emotion_labels[predicted_label]}")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python predict_emotion.py path_to_audio.wav")
+    else:
+        predict(sys.argv[1])
