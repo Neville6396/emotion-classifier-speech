@@ -28,7 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Load Trained Model ---
-model = load_model("emotion_classifier (1).h5")
+model = load_model("emotion_classifier.h5")
 emotion_mapping = {
     0: "angry",
     1: "calm",
